@@ -95,12 +95,12 @@ let getLanguages123() =
         promise {
             do! Promise.sleep 2000
             return [
-                "1", "C"
-                "10", "C#"
-                "4", "Clojure"
-                "7", "Elm"
-                "9", "F#"
-                "269", "JavaScript"
+                "1", "Developer"
+                "10", "Tester"
+                "4", "Analytic"
+                "7", "Team-Lead"
+                "9", "Architecter"
+                "269", "Manager"
             ]
         }
 let decodeIntFromString =
@@ -145,47 +145,47 @@ let (formState, formConfig) =
                 .WithLabel("Name")
                 .IsRequired()
                 .WithDefaultView())
+
+
+
+        .AddField(
+            BasicInput
+                .Create("email")
+                .WithLabel("Email")
+                .IsRequired()
+                .AddValidator(fun x ->
+                    if System.Text.RegularExpressions.Regex.IsMatch(x.Value, @"^\S+@\S+\.\S+$")
+                    then Types.Valid
+                    else Types.Invalid "Email is not valid")
+                .WithDefaultView())
+
+        .AddField(
+            BasicInput
+                .Create("password")
+                .WithLabel("Pasword")
+                .IsRequired()
+                .AddValidator(fun x ->
+                    if x.Value.Length <5
+                    then Types.Invalid "Password must be longer than 5 characters"
+                    else Types.Valid)
+                .WithDefaultView())
+
         .AddField(
             BasicSelect
-                .Create("favLanguage")
-                .WithLabel("Favorite language")
+                .Create("specialty")
+                .WithLabel("Specialty")
                 .WithValuesFromServer(getLanguages)
                 .WithPlaceholder("")
                 .IsRequired("I know it's hard but you need to choose")
-                .WithDefaultView()
-                )
-        .AddField(
-            BasicTextarea
-                .Create("description")
-                .WithLabel("Description")
-                .IsRequired()
-                .WithPlaceholder("Here you can introduce yourself...")
-                .AddValidator(fun state ->
-                    if state.Value.Length < 10 then
-                        Types.Invalid "You need to enter a description of at least 10 characters"
-                    else
-                        Types.Valid
-                )
-                .WithDefaultView()
-        )
-        .AddField(
+                .WithDefaultView())
+
+            .AddField(
             BasicCheckbox
-                .Create("condition")
-                .WithLabel("I agree with the terms and conditions")
+                .Create("allowEmail")
+                .WithLabel("  I agree with the terms and conditions")
                 .IsRequired()
-                .WithDefaultView()
-        )
-        .AddField(
-            BasicRadio
-                .Create("publicSetting")
-                .WithLabel("Make your profile public ?")
-                .IsRequired()
-                .WithValues([
-                    "1", "Yes"
-                    "2", "No"
-                ])
-                .WithDefaultView()
-        )
+                .WithDefaultView())
+
         .Build()
 
 let applyIfEditing model f =
@@ -198,7 +198,7 @@ let private formActions (formState: FormBuilder.Types.State) dispatch =
         [ button [ OnClick(fun _ ->
                     dispatch Submit
                    ) ]
-            [ str "Submit" ] ]
+            [ str "Signup" ] ]
 
 
 let viewFormEditing model dispatch =
@@ -217,7 +217,7 @@ let view (model: Model) dispatch =
             div []
                 [ Message.message [ Message.Color IsInfo ]
                     [ Message.body []
-                        [ str "If you want to test the server side validation feature, enter \"Test\" in the \"Name\" field." ] ]
+                        [ str "Hello, signup please" ] ]
                   viewFormEditing formState dispatch ]
         | Completed ->
             Message.message [ Message.Color IsInfo ]
@@ -251,25 +251,6 @@ type DecoderError = string * ErrorReason
 type Decoder<'T> = string -> JsonValue -> Result<'T, DecoderError>
 
 let update msg model: Model * Cmd<Home.Types.Msg> =
-    let (>=>) f1 f2 x =
-        let f3 x =
-            match f1 x with
-            | Some x -> f2 x
-            | None -> None
-        f3 x
-
-    let s = Some >> (fun x -> printf "1"; x)
-             >=> Some >> (fun x -> printf "2"; x)
-               >=> Some >> (fun x -> printf "3"; x) >> ignore
-    s 1
-    let (>=>) (f1: Decoder<'a> -> Decoder<'a>) (f2: Decoder<'a> -> Decoder<'a>) : Decoder<'a> =
-         fun a b ->
-             match f1 a b with
-             | Ok a 
-
-    let q = Decode.int >=> Decode.int
-
-
     match msg with
     | SuccessResponse response ->
         applyIfEditing model

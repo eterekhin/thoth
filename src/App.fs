@@ -54,9 +54,6 @@ let root model dispatch =
             [ div
                 [ ClassName "columns" ]
                 [ div
-                    [ ClassName "column is-3" ]
-                    [ menu model.CurrentPage ]
-                  div
                     [ ClassName "column" ]
                     [ pageHtml model.CurrentPage ] ] ] ] ]
 

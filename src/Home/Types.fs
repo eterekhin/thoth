@@ -23,19 +23,19 @@ let decodeAllowPublic =
 
 type FormData = {
     Name:string;
-    FavLanguage:string;
-    Description:string;
-    Condition :bool;
-    AllowPublic:bool
+    Email:string
+    Password:string
+    AllowEmail :bool;
+    Specialty:int
 }
  with static member Decoder =
         Decode.object (fun get ->
               {
                Name = get.Required.Field "name" Decode.string
-               FavLanguage = get.Required.Field "favLanguage" Decode.string
-               Description = get.Required.Field "description" Decode.string
-               Condition = get.Required.Field "condition" Decode.bool
-               AllowPublic = get.Required.Field "publicSetting" decodeAllowPublic
+               Email = get.Required.Field "email" Decode.string
+               Specialty = get.Required.Field "specialty" Decode.int
+               AllowEmail = get.Required.Field "allowEmail" decodeAllowPublic
+               Password = get.Required.Field "password" Decode.string
               }
           )
 
