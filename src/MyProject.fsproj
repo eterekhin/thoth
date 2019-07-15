@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Global to the app -->
+    <Compile Include="Global.fs" />
+    <!-- Info -->
+    <Compile Include="Info/View.fs" />
+    <!-- Counter -->
+    <Compile Include="Counter/Types.fs" />
+    <Compile Include="Counter/State.fs" />
+    <Compile Include="Counter/View.fs" />
+    <!-- Home -->
+    <Compile Include="Home/Types.fs" />
+    <Compile Include="Home/State.fs" />
+    <Compile Include="Home/View.fs" />
+    <!-- Navbar -->
+    <Compile Include="Navbar/View.fs" />
+    <!-- App -->
+    <Compile Include="Types.fs" />
+    <Compile Include="State.fs" />
+    <Compile Include="App.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fable.Import.Browser" Version="1.3.0" />
+    <PackageReference Include="Fulma" Version="1.1.0" />
+    <PackageReference Include="Thoth.Elmish" Version="0.1.1" />
+    <PackageReference Include="Thoth.Elmish.FormBuilder" Version="0.2.0" />
+    <PackageReference Include="Thoth.Elmish.FormBuilder.BasicFields" Version="0.1.2" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>
