@@ -21,8 +21,10 @@ open Fable.PowerPack
 open Thoth.Json
 open Fable.Import
 
+open Fable.Core
 open Fulma
 open Fable.Core.JsInterop
+open Fable.Import.React
 open Fable.PowerPack
 open Fable.PowerPack
 open Fable.PowerPack
@@ -71,15 +73,12 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
                     Decode.succeed CreationResponse.Ok
 
                 | "error" ->
-                   printf "error"
-                   let q =
-                       Decode.field "data"
+                   Decode.field "data"
                            (Decode.string
                            |> Decode.list)
                            |> Decode.map (fun xx ->
-                               printf "aa %A" xx
-                               CreationResponse.Errors (xx |> List.map (fun x -> { Key = "name"; Text = x })))
-                   q
+                               CreationResponse.Errors (xx |> List.map (fun x -> { Key = "ForValidation"; Text = x })))
+
                 | unkown ->
                     sprintf "`%s` is an unkown code" unkown
                     |> Decode.fail
@@ -136,6 +135,9 @@ let getDataFromServer =
                         ]
         }
 
+[<Emit("null")>]
+let emptyElement : ReactElement= jsNative
+
 let getLanguages =
     promise {
         // We are calling directly `FakeServer.getLanguages` but in a
@@ -144,55 +146,51 @@ let getLanguages =
     }
 let (formState, formConfig) =
        Thoth.Elmish.FormBuilder.Form<Thoth.Elmish.FormBuilder.Types.Msg>
-        .Create(OnFormMsg)
-        .AddField(
-            BasicInput
-                .Create("name")
-                .WithLabel("Name")
-                .IsRequired()
-                .WithDefaultView())
-
-
-
-        .AddField(
-            BasicInput
-                .Create("email")
-                .WithLabel("Email")
-                .IsRequired()
-                .AddValidator(fun x ->
-                    if System.Text.RegularExpressions.Regex.IsMatch(x.Value, @"^\S+@\S+\.\S+$")
-                    then Types.Valid
-                    else Types.Invalid "Email is not valid")
-                .WithDefaultView())
-
-        .AddField(
-            BasicInput
-                .Create("password")
-                .WithLabel("Pasword")
-                .IsRequired()
-                .AddValidator(fun x ->
-                    if x.Value.Length < 5
-                    then Types.Invalid "Password must be longer than 5 characters"
-                    else Types.Valid)
-                .WithDefaultView())
-
-        .AddField(
-            BasicSelect
-                .Create("specialty")
-                .WithLabel("Specialty")
-                .WithValuesFromServer(getLanguages)
-                .WithPlaceholder("")
-                .IsRequired("I know it's hard but you need to choose")
-                .WithDefaultView())
+            .Create(OnFormMsg)
+            .AddField(
+                BasicInput
+                    .Create("name")
+                    .WithLabel("Name")
+                    .IsRequired()
+                    .WithDefaultView())
+            .AddField(
+                BasicInput
+                    .Create("email")
+                    .WithLabel("Email")
+                    .IsRequired()
+                    .AddValidator(fun x ->
+                        if System.Text.RegularExpressions.Regex.IsMatch(x.Value, @"^\S+@\S+\.\S+$")
+                        then Types.Valid
+                        else Types.Invalid "Email is not valid")
+                    .WithDefaultView())
 
             .AddField(
-            BasicCheckbox
-                .Create("allowEmail")
-                .WithLabel("  I agree with the terms and conditions")
-                .IsRequired()
-                .WithDefaultView())
+                BasicInput
+                    .Create("password")
+                    .WithLabel("Pasword")
+                    .IsRequired()
+                    .AddValidator(fun x ->
+                        if x.Value.Length < 5
+                        then Types.Invalid "Password must be longer than 5 characters"
+                        else Types.Valid)
+                    .WithDefaultView())
 
-        .Build()
+            .AddField(
+                BasicSelect
+                    .Create("specialty")
+                    .WithLabel("Specialty")
+                    .WithValuesFromServer(getLanguages)
+                    .WithPlaceholder("")
+                    .IsRequired("I know it's hard but you need to choose")
+                    .WithDefaultView())
+
+            .AddField(
+                BasicCheckbox
+                    .Create("allowEmail")
+                    .WithLabel("  I agree with the terms and conditions")
+                    .IsRequired()
+                    .WithDefaultView())
+            .Build()
 
 let applyIfEditing model f =
     match model with

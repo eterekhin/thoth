@@ -27,7 +27,8 @@ type FormData = {
     Email:string
     Password:string
     AllowEmail :bool;
-    Specialty:int
+    Specialty:int;
+    ForValidation:string
 }
  with static member Decoder =
         Decode.object (fun get ->
@@ -37,6 +38,7 @@ type FormData = {
                Specialty = get.Required.Field "specialty" Decode.int
                AllowEmail = get.Required.Field "allowEmail" decodeAllowPublic
                Password = get.Required.Field "password" Decode.string
+               ForValidation = ""
               }
           )
 
