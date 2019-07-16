@@ -1,4 +1,5 @@
 module Home.Types
+open System
 open Thoth.Elmish
 open Thoth.Elmish.FormBuilder
 open Thoth.Elmish.FormBuilder.BasicFields
@@ -57,5 +58,5 @@ type Msg =
     | ChangeStr of string
     | OnFormMsg of FormBuilder.Types.Msg
     | SuccessResponse of CreationResponse
-    | FailResponse
+    | FailResponse of Exception
     | Submit

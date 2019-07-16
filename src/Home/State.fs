@@ -23,6 +23,12 @@ open Fable.Import
 
 open Fulma
 open Fable.Core.JsInterop
+open Fable.PowerPack
+open Fable.PowerPack
+open Fable.PowerPack
+open Fable.PowerPack.Fetch.Fetch_types
+open Fable.PowerPack.Fetch.Fetch_types
+open Fable.PowerPack.Keyboard
 open Thoth.Json
 
 let s = obj
@@ -38,31 +44,25 @@ type test = {
 
 let createProfileFromServer (body: string) =
     promise {
-         do! Promise.sleep 1000
-         match Decode.fromString FormData.Decoder body with
-         | Result.Ok data ->
-             return if data.Name = "Test" then
-                     Encode.toString 4 (Encode.object [
-                                                       "code", Encode.string "errors"
-                                                       "data", Encode.list
-                                                                   [
-                                                                     Encode.object
-                                                                         [
-                                                                             "Key", Encode.string "name"
-                                                                             "Text", Encode.string "it's name already used"
-                                                                         ]
-                                                                   ]
-                                                      ])
-                    else
-                     Encode.toString 4 (Encode.object [ "code", Encode.string "ok" ])
-         | Error e -> return failwith e
+
+        let defaultProps =
+              [
+                RequestProperties.Method HttpMethod.POST;
+                Fetch.requestHeaders [ ContentType "application/json" ]
+                RequestProperties.Body(body |> unbox) ]
+
+        let! response = Fetch.postRecord "http://localhost:8080/signup" body defaultProps
+
+
+        return! response.text()
     }
+
+
 let createProfile (body: string): JS.Promise<CreationResponse> =
     printf "createProfile"
-
     promise {
          let! data = createProfileFromServer body
-         printf "data %A" data
+         printf "createResponse data:%A" data
          let decoder =
             Decode.field "code" Decode.string
             |> Decode.andThen (
@@ -70,10 +70,16 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
                 | "ok" ->
                     Decode.succeed CreationResponse.Ok
 
-                | "errors" ->
-
-                   Decode.succeed (CreationResponse.Errors [ { Key = "name"; Text = "text" } ])
-
+                | "error" ->
+                   printf "error"
+                   let q =
+                       Decode.field "data"
+                           (Decode.string
+                           |> Decode.list)
+                           |> Decode.map (fun xx ->
+                               printf "aa %A" xx
+                               CreationResponse.Errors (xx |> List.map (fun x -> { Key = "name"; Text = x })))
+                   q
                 | unkown ->
                     sprintf "`%s` is an unkown code" unkown
                     |> Decode.fail
@@ -85,7 +91,7 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
                 printf "result %A" result
                 result
             | Error msg ->
-                printf "error"
+                printf "failwith"
                 failwith msg
          return result
     }
@@ -96,11 +102,11 @@ let getLanguages123() =
             do! Promise.sleep 2000
             return [
                 "1", "Developer"
-                "10", "Tester"
-                "4", "Analytic"
-                "7", "Team-Lead"
-                "9", "Architecter"
-                "269", "Manager"
+                "2", "Tester"
+                "3", "Analytic"
+                "4", "Team-Lead"
+                "5", "Architecter"
+                "6", "Manager"
             ]
         }
 let decodeIntFromString =
@@ -165,7 +171,7 @@ let (formState, formConfig) =
                 .WithLabel("Pasword")
                 .IsRequired()
                 .AddValidator(fun x ->
-                    if x.Value.Length <5
+                    if x.Value.Length < 5
                     then Types.Invalid "Password must be longer than 5 characters"
                     else Types.Valid)
                 .WithDefaultView())
@@ -270,7 +276,8 @@ let update msg model: Model * Cmd<Home.Types.Msg> =
              )
 
 
-    | FailResponse ->
+    | FailResponse exn ->
+        printf "exn %A" exn
         applyIfEditing model
             (fun model ->
                 printf "FailResponse"
@@ -287,7 +294,7 @@ let update msg model: Model * Cmd<Home.Types.Msg> =
                     let body = Form.toJson formConfig newFormState
                     let newModel = model.FormState |> Form.setLoading true
                     Editing { model with FormState = newModel },
-                     Cmd.ofPromise createProfile body SuccessResponse (fun x -> FailResponse)
+                     Cmd.ofPromise createProfile body SuccessResponse (fun x -> FailResponse x)
                 else
                     Editing model, []
              )
