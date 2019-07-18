@@ -36,8 +36,8 @@ let menu currentPage =
           menuItem "Counter sample" Counter currentPage
           menuItem "About" Page.About currentPage ] ]
 
-let root model dispatch =
 
+let root model dispatch =
   let pageHtml page =
     match page with
     | Page.About -> Info.View.root
@@ -54,8 +54,9 @@ let root model dispatch =
             [ div
                 [ ClassName "columns" ]
                 [ 
-
-                  menu model.CurrentPage
+                  (match model.User with 
+                    |UnAuth -> div[][]
+                    |Auth -> menu model.CurrentPage)
                   div
                     [ ClassName "column" ]
                     [ pageHtml model.CurrentPage ] 

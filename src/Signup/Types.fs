@@ -30,7 +30,7 @@ type FormData = {
     Specialty:int;
     ForValidation:string
 }
- with static member Decoder =
+ with static member Decoder :Decode.Decoder<FormData>=
         Decode.object (fun get ->
               {
                Name = get.Required.Field "name" Decode.string
@@ -43,7 +43,7 @@ type FormData = {
           )
 
 type CreationResponse =
-    |Ok
+    |Ok of UserInfo.AuthUser
     |Errors of Types.ErrorDef list
 
 type EditingModel =
@@ -54,7 +54,7 @@ type EditingModel =
 
 type Model =
     | Editing of EditingModel
-    | Completed
+    | Completed of UserInfo.AuthUser
 
 type Msg =
     | ChangeStr of string

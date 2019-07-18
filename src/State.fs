@@ -6,7 +6,8 @@ open Elmish.Browser.UrlParser
 open Fable.Import.Browser
 open Global
 open Types
-
+open UserInfo
+ 
 let pageParser: Parser<Page->Page,Page> =
     oneOf [
         map About (s "about")
@@ -29,7 +30,8 @@ let init result =
         urlUpdate result
           { CurrentPage = Signup
             Counter = counter
-            Signup = signup }
+            Signup = signup
+            User = User.UnAuthUser }
 
     model, Cmd.batch [ cmd
                        Cmd.map CounterMsg counterCmd

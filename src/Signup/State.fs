@@ -12,7 +12,7 @@ open Thoth.Json
 open Fable.Import
 open Fable.Core
 open Fable.Import.React
-
+open UserInfo
 open Fable.PowerPack.Fetch.Fetch_types
 
 let createProfileFromServer (body: string) =
@@ -26,8 +26,8 @@ let createProfileFromServer (body: string) =
 
         let! response = Fetch.postRecord "http://localhost:8080/signup" body defaultProps
 
-
-        return! response.text()
+        let text = response.text();
+        return! text;
     }
 
 
@@ -41,7 +41,11 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
             |> Decode.andThen (
                 function
                 | "ok" ->
-                    Decode.succeed CreationResponse.Ok
+                    let authUserDto = Decode.fromString AuthUser.Decoder data
+                    match authUserDto with 
+                    | Result.Ok ok -> CreationResponse.Ok ok
+                    | Error error -> CreationResponse.Errors
+                                            
 
                 | "error" ->
                    let decodeTuple = Decode.tuple2 Decode.string (Decode.string |> Decode.list)
@@ -167,7 +171,7 @@ let (formState, formConfig) =
 let applyIfEditing model f =
     match model with
     | Editing m -> f m
-    | Completed -> Completed, []
+    | Completed x-> Completed x, []
 
 let private formActions (formState: FormBuilder.Types.State) dispatch =
     div []
@@ -197,11 +201,12 @@ let update msg model: Model * Cmd<Signup.Types.Msg> =
     | SuccessResponse response ->
         applyIfEditing model
             (fun x ->
-                printf "Success Response"
+                printf "Success Response %A" x
                 match response with
-                | Ok ->
+                | Ok signup->
                     let _ = x.FormState |> Form.setLoading false
-                    Completed, []
+    
+                    Completed signup, []
                 | Errors errors ->
                     let newFormState =
                                 x.FormState
