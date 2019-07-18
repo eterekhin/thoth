@@ -73,11 +73,12 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
                     Decode.succeed CreationResponse.Ok
 
                 | "error" ->
+                   let decodeTuple = Decode.tuple2 Decode.string (Decode.string |> Decode.list)
                    Decode.field "data"
-                           (Decode.string
-                           |> Decode.list)
-                           |> Decode.map (fun xx ->
-                               CreationResponse.Errors (xx |> List.map (fun x -> { Key = "ForValidation"; Text = x })))
+                           (decodeTuple)
+                            |> Decode.map (fun xx ->
+                               let (name,errs) = xx;
+                               CreationResponse.Errors (errs |> List.map (fun x -> { Key = name; Text = x })))
 
                 | unkown ->
                     sprintf "`%s` is an unkown code" unkown
