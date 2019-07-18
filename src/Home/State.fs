@@ -10,39 +10,10 @@ open Fable.Helpers.React.Props
 open Fable.PowerPack
 open Thoth.Json
 open Fable.Import
-open Elmish
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
-open System
-open Thoth.Elmish
-open Thoth.Elmish.FormBuilder
-open Thoth.Elmish.FormBuilder.BasicFields
-open Fable.PowerPack
-open Thoth.Json
-open Fable.Import
-
 open Fable.Core
-open Fulma
-open Fable.Core.JsInterop
 open Fable.Import.React
-open Fable.PowerPack
-open Fable.PowerPack
-open Fable.PowerPack
-open Fable.PowerPack.Fetch.Fetch_types
-open Fable.PowerPack.Fetch.Fetch_types
-open Fable.PowerPack.Keyboard
-open Thoth.Json
 
-let s = obj
-type test = {
-    name: string
-    surname: string
- }
- let object (values: (string * obj) seq) =
-        let o = obj()
-        for (key, value) in values do
-            o?key <- value
-        box o
+open Fable.PowerPack.Fetch.Fetch_types
 
 let createProfileFromServer (body: string) =
     promise {
@@ -97,7 +68,7 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
     }
 
 
-let getLanguages123() =
+let getSpecialties() =
         promise {
             do! Promise.sleep 2000
             return [
@@ -143,10 +114,10 @@ let getLanguages =
     promise {
         // We are calling directly `FakeServer.getLanguages` but in a
         // real case you would make a server request
-        return! getLanguages123()
+        return! getSpecialties()
     }
 let (formState, formConfig) =
-       Thoth.Elmish.FormBuilder.Form<Thoth.Elmish.FormBuilder.Types.Msg>
+       FormBuilder.Form<Types.Msg>
             .Create(OnFormMsg)
             .AddField(
                 BasicInput
@@ -161,8 +132,8 @@ let (formState, formConfig) =
                     .IsRequired()
                     .AddValidator(fun x ->
                         if System.Text.RegularExpressions.Regex.IsMatch(x.Value, @"^\S+@\S+\.\S+$")
-                        then Types.Valid
-                        else Types.Invalid "Email is not valid")
+                        then Valid
+                        else Invalid "Email is not valid")
                     .WithDefaultView())
 
             .AddField(
@@ -172,7 +143,7 @@ let (formState, formConfig) =
                     .IsRequired()
                     .AddValidator(fun x ->
                         if x.Value.Length < 5
-                        then Types.Invalid "Password must be longer than 5 characters"
+                        then Invalid "Password must be longer than 5 characters"
                         else Types.Valid)
                     .WithDefaultView())
 
@@ -215,45 +186,11 @@ let viewFormEditing model dispatch =
           Loader = Form.DefaultLoader }
 
 
-let view (model: Model) dispatch =
-    let content =
-        match model with
-        | Editing formState ->
-            div []
-                [ Message.message [ Message.Color IsInfo ]
-                    [ Message.body []
-                        [ str "Hello, signup please" ] ]
-                  viewFormEditing formState dispatch ]
-        | Completed ->
-            Message.message [ Message.Color IsInfo ]
-                [ Message.header []
-                    [ str "Your profile has been created" ]
-                  Message.body []
-                    [ str "The demo will reset in a few seconds" ] ]
-
-    div [ Style [ MaxWidth "500px"
-                  MinHeight "530px"
-                  PaddingTop "10px" ] ]
-        [ content ]
 let init _ =
     let (formState, formCmds) = Form.init formConfig formState
     Editing { FormState = formState; StringValue = "" }, Cmd.map OnFormMsg formCmds
 
 
-type JsonValue = obj
-
-type ErrorReason =
-    | BadPrimitive of string * JsonValue
-    | BadPrimitiveExtra of string * JsonValue * string
-    | BadType of string * JsonValue
-    | BadField of string * JsonValue
-    | BadPath of string * JsonValue * string
-    | TooSmallArray of string * JsonValue
-    | FailMessage of string
-    | BadOneOf of string list
-
-type DecoderError = string * ErrorReason
-type Decoder<'T> = string -> JsonValue -> Result<'T, DecoderError>
 
 let update msg model: Model * Cmd<Home.Types.Msg> =
     match msg with
@@ -293,7 +230,7 @@ let update msg model: Model * Cmd<Home.Types.Msg> =
                     let body = Form.toJson formConfig newFormState
                     let newModel = model.FormState |> Form.setLoading true
                     Editing { model with FormState = newModel },
-                     Cmd.ofPromise createProfile body SuccessResponse (fun x -> FailResponse x)
+                     Cmd.ofPromise createProfile body SuccessResponse FailResponse
                 else
                     Editing model, []
              )

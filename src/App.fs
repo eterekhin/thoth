@@ -53,9 +53,19 @@ let root model dispatch =
             [ ClassName "container" ]
             [ div
                 [ ClassName "columns" ]
-                [ div
+                [ 
+                  div
                     [ ClassName "column" ]
-                    [ pageHtml model.CurrentPage ] ] ] ] ]
+                    [ pageHtml model.CurrentPage ] 
+                    
+                  div
+                    [ ClassName "column" ]
+                    [ pageHtml model.CurrentPage ] 
+                    
+                    ]
+                 
+                 
+                 ] ] ]
 
 open Elmish.React
 open Elmish.Debug
