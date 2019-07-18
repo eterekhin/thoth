@@ -1,4 +1,4 @@
-module Home.View
+module Signup.View
 open Types
 open Fulma
 open Fable.Helpers.React
@@ -7,7 +7,7 @@ open Thoth.Elmish.FormBuilder
 open Thoth.Elmish.FormBuilder.BasicFields
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
-open Home.State
+open Signup.State
 let private formActions (formState: FormBuilder.Types.State) dispatch =
     div []
         [ button [ OnClick(fun _ ->

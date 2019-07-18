@@ -11,7 +11,7 @@ let pageParser: Parser<Page->Page,Page> =
     oneOf [
         map About (s "about")
         map Counter (s "counter")
-        map Home (s "home")
+        map Signup (s "signup")
     ]
 
 let urlUpdate (result : Page option) model =
@@ -24,22 +24,22 @@ let urlUpdate (result : Page option) model =
 
 let init result =
     let (counter, counterCmd) = Counter.State.init()
-    let (home, homeCmd) = Home.State.init()
+    let (signup, signupCmd) = Signup.State.init()
     let (model, cmd) =
         urlUpdate result
-          { CurrentPage = Home
+          { CurrentPage = Signup
             Counter = counter
-            Home = home }
+            Signup = signup }
 
     model, Cmd.batch [ cmd
                        Cmd.map CounterMsg counterCmd
-                       Cmd.map HomeMsg homeCmd ]
+                       Cmd.map SignupMsg signupCmd ]
 
 let update msg model =
     match msg with
     | CounterMsg msg ->
         let (counter, counterCmd) = Counter.State.update msg model.Counter
         { model with Counter = counter }, Cmd.map CounterMsg counterCmd
-    | HomeMsg msg ->
-        let (home, homeCmd) = Home.State.update msg model.Home
-        { model with Home = home }, Cmd.map HomeMsg homeCmd
+    | SignupMsg msg ->
+        let (signup, signupCmd) = Signup.State.update msg model.Signup
+        { model with Signup = signup }, Cmd.map SignupMsg signupCmd

@@ -1,4 +1,4 @@
-module Home.Types
+module Signup.Types
 open System
 open Thoth.Elmish
 open Thoth.Elmish.FormBuilder

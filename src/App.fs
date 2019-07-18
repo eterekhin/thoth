@@ -32,7 +32,7 @@ let menu currentPage =
         [ str "General" ]
       ul
         [ ClassName "menu-list" ]
-        [ menuItem "Home" Home currentPage
+        [ menuItem "Signup" Signup currentPage
           menuItem "Counter sample" Counter currentPage
           menuItem "About" Page.About currentPage ] ]
 
@@ -42,7 +42,7 @@ let root model dispatch =
     match page with
     | Page.About -> Info.View.root
     | Counter -> Counter.View.root model.Counter (CounterMsg >> dispatch)
-    | Home -> Home.View.root model.Home (HomeMsg >> dispatch)
+    | Signup -> Signup.View.root model.Signup (SignupMsg >> dispatch)
 
   div
     []
@@ -54,18 +54,13 @@ let root model dispatch =
             [ div
                 [ ClassName "columns" ]
                 [ 
+
+                  menu model.CurrentPage
                   div
                     [ ClassName "column" ]
                     [ pageHtml model.CurrentPage ] 
                     
-                  div
-                    [ ClassName "column" ]
-                    [ pageHtml model.CurrentPage ] 
-                    
-                    ]
-                 
-                 
-                 ] ] ]
+                 ] ]] ]
 
 open Elmish.React
 open Elmish.Debug

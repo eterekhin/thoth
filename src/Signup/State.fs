@@ -1,5 +1,5 @@
 
-module Home.State
+module Signup.State
 open Thoth.Elmish
 open Thoth.Elmish.FormBuilder
 open Thoth.Elmish.FormBuilder.BasicFields
@@ -192,7 +192,7 @@ let init _ =
 
 
 
-let update msg model: Model * Cmd<Home.Types.Msg> =
+let update msg model: Model * Cmd<Signup.Types.Msg> =
     match msg with
     | SuccessResponse response ->
         applyIfEditing model

@@ -4,9 +4,9 @@ open Global
 
 type Msg =
     | CounterMsg of Counter.Types.Msg
-    | HomeMsg of Home.Types.Msg
+    | SignupMsg of Signup.Types.Msg
 
 type Model =
     { CurrentPage: Page
       Counter: Counter.Types.Model
-      Home: Home.Types.Model }
+      Signup: Signup.Types.Model }
