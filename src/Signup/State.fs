@@ -1,12 +1,9 @@
-
 module Signup.State
 open Thoth.Elmish
 open Thoth.Elmish.FormBuilder
 open Thoth.Elmish.FormBuilder.BasicFields
 open Elmish
 open Types
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
 open Fable.PowerPack
 open Thoth.Json
 open Fable.Import
@@ -14,6 +11,7 @@ open Fable.Core
 open Fable.Import.React
 open UserInfo
 open Fable.PowerPack.Fetch.Fetch_types
+open Http
 
 let createProfileFromServer (body: string) =
     promise {
@@ -41,11 +39,7 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
             |> Decode.andThen (
                 function
                 | "ok" ->
-                    let authUserDto = Decode.fromString AuthUser.Decoder data
-                    match authUserDto with 
-                    | Result.Ok ok -> CreationResponse.Ok ok
-                    | Error error -> CreationResponse.Errors
-                                            
+                   Decode.field "data" (AuthUser.Decoder |> Decode.map  CreationResponse.Ok)
 
                 | "error" ->
                    let decodeTuple = Decode.tuple2 Decode.string (Decode.string |> Decode.list)
@@ -63,10 +57,8 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
          let result =
             match Decode.fromString decoder data with
             | Result.Ok result ->
-                printf "result %A" result
                 result
             | Error msg ->
-                printf "failwith"
                 failwith msg
          return result
     }
@@ -173,22 +165,6 @@ let applyIfEditing model f =
     | Editing m -> f m
     | Completed x-> Completed x, []
 
-let private formActions (formState: FormBuilder.Types.State) dispatch =
-    div []
-        [ button [ OnClick(fun _ ->
-                    dispatch Submit
-                   ) ]
-            [ str "Signup" ] ]
-
-
-let viewFormEditing model dispatch =
-    Form.render
-        { Config = formConfig
-          State = model.FormState
-          Dispatch = dispatch
-          ActionsArea = (formActions model.FormState dispatch)
-          Loader = Form.DefaultLoader }
-
 
 let init _ =
     let (formState, formCmds) = Form.init formConfig formState
@@ -201,27 +177,22 @@ let update msg model: Model * Cmd<Signup.Types.Msg> =
     | SuccessResponse response ->
         applyIfEditing model
             (fun x ->
-                printf "Success Response %A" x
                 match response with
                 | Ok signup->
                     let _ = x.FormState |> Form.setLoading false
-    
+                    printf "%A" signup
                     Completed signup, []
                 | Errors errors ->
                     let newFormState =
                                 x.FormState
                                 |> Form.setLoading false
                                 |> Form.setErrors formConfig errors
-                    printf "newFormState %A" newFormState
                     Editing { x with FormState = newFormState }, Cmd.none
              )
 
-
     | FailResponse exn ->
-        printf "exn %A" exn
         applyIfEditing model
             (fun model ->
-                printf "FailResponse"
                 let state = model.FormState |> Form.setLoading false
                 Editing { model with FormState = state }, []
             )
@@ -229,7 +200,6 @@ let update msg model: Model * Cmd<Signup.Types.Msg> =
     | Submit ->
         applyIfEditing model
             (fun model ->
-                printf "Submit"
                 let (newFormState, isValid) = Form.validate formConfig model.FormState
                 if isValid then
                     let body = Form.toJson formConfig newFormState
@@ -244,6 +214,5 @@ let update msg model: Model * Cmd<Signup.Types.Msg> =
         applyIfEditing model
             (fun model ->
                 let (formState, formCmd) = Form.update formConfig msg model.FormState
-                printf "formState"
                 Editing { model with FormState = formState }, Cmd.map OnFormMsg formCmd
             )

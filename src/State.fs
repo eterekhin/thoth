@@ -13,6 +13,7 @@ let pageParser: Parser<Page->Page,Page> =
         map About (s "about")
         map Counter (s "counter")
         map Signup (s "signup")
+        map Signin (s "signin")
     ]
 
 let urlUpdate (result : Page option) model =
@@ -26,12 +27,14 @@ let urlUpdate (result : Page option) model =
 let init result =
     let (counter, counterCmd) = Counter.State.init()
     let (signup, signupCmd) = Signup.State.init()
+    let (signin,signinCmd) = Signin.State.init();
     let (model, cmd) =
         urlUpdate result
           { CurrentPage = Signup
             Counter = counter
             Signup = signup
-            User = User.UnAuthUser }
+            Signin = signin
+          }
 
     model, Cmd.batch [ cmd
                        Cmd.map CounterMsg counterCmd
@@ -44,4 +47,9 @@ let update msg model =
         { model with Counter = counter }, Cmd.map CounterMsg counterCmd
     | SignupMsg msg ->
         let (signup, signupCmd) = Signup.State.update msg model.Signup
+        printf "signup in model  %A" model.Signup
+        printf "signup %A" signup
         { model with Signup = signup }, Cmd.map SignupMsg signupCmd
+    | SigninMsg msg -> 
+        let (signinModel,signinCmd) = Signin.State.update model.Signin msg
+        {model with Signin = signinModel}, Cmd.map SigninMsg signinCmd

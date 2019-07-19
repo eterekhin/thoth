@@ -10,12 +10,13 @@ open Fable.Import.Browser
 open Types
 open App.State
 open Global
-
+open Signin
 importAll "../sass/main.sass"
 
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 
+//#region Menus
 let menuItem label page currentPage =
     li
       [ ]
@@ -24,7 +25,19 @@ let menuItem label page currentPage =
             Href (toHash page) ]
           [ str label ] ]
 
-let menu currentPage =
+let unAuthMenu currentPage= 
+  aside
+      [ ClassName "menu" ]
+      [ p
+          [ ClassName "menu-label" ]
+          [ str "General" ]
+        ul
+          [ ClassName "menu-list" ]
+          [ menuItem "Signup" Signup currentPage
+            menuItem "Signin" Signin currentPage
+       ] ]
+
+let authMenu currentPage =
   aside
     [ ClassName "menu" ]
     [ p
@@ -32,10 +45,9 @@ let menu currentPage =
         [ str "General" ]
       ul
         [ ClassName "menu-list" ]
-        [ menuItem "Signup" Signup currentPage
-          menuItem "Counter sample" Counter currentPage
+        [ menuItem "Counter sample" Counter currentPage
           menuItem "About" Page.About currentPage ] ]
-
+//#endregion
 
 let root model dispatch =
   let pageHtml page =
@@ -43,6 +55,7 @@ let root model dispatch =
     | Page.About -> Info.View.root
     | Counter -> Counter.View.root model.Counter (CounterMsg >> dispatch)
     | Signup -> Signup.View.root model.Signup (SignupMsg >> dispatch)
+    | Signin -> Signin.View.root model.Signin (SigninMsg >> dispatch)
 
   div
     []
@@ -54,9 +67,9 @@ let root model dispatch =
             [ div
                 [ ClassName "columns" ]
                 [ 
-                  (match model.User with 
-                    |UnAuth -> div[][]
-                    |Auth -> menu model.CurrentPage)
+                  (match model.Signup with 
+                    |Signup.Types.Model.Completed s -> authMenu model.CurrentPage
+                    |_ -> unAuthMenu  model.CurrentPage)
                   div
                     [ ClassName "column" ]
                     [ pageHtml model.CurrentPage ] 

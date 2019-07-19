@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Global to the app -->
+    <Compile Include="Http.fs"/>
     <Compile Include="Global.fs" />
     <Compile Include="UserInfo.fs" />
     <!-- Info -->
@@ -12,6 +13,10 @@
     <Compile Include="Counter/Types.fs" />
     <Compile Include="Counter/State.fs" />
     <Compile Include="Counter/View.fs" />
+    <!-- Signin -->
+    <Compile Include="Signin/Types.fs" />
+    <Compile Include="Signin/State.fs" />
+    <Compile Include="Signin/View.fs" />
     <!-- Signup -->
     <Compile Include="Signup/Types.fs" />
     <Compile Include="Signup/State.fs" />

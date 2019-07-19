@@ -28,6 +28,7 @@ x64/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+/ionide.*
 *_i.c
 *_p.c
 *.ilk
