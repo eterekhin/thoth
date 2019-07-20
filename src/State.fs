@@ -35,42 +35,69 @@ let urlUpdate (result : Page option) model =
               | Some page ->
                 UnAuth { unAuth with CurrentPage = page }, []
 
-
-let init result =
-    let (counter, counterCmd) = Counter.State.init()
+let unAuthInit() = 
     let (signup, signupCmd) = Signup.State.init()
     let (signin,signinCmd) = Signin.State.init();
-    let (home,homeCmd) = Home.State.init()
-    let (model, cmd) =
-        urlUpdate result
-                (UnAuth {CurrentPage = Signup
-                         Signup = signup
-                         Signin = signin
-                        })
+    let model = UnAuth {CurrentPage = Signin;Signup = signup;Signin = signin}
+    model, Cmd.batch([
+                            Cmd.map SignupMsg signupCmd;
+                            Cmd.map SigninMsg signinCmd])
 
-    model, Cmd.batch [ cmd
-                       Cmd.map CounterMsg counterCmd
-                       Cmd.map SignupMsg signupCmd ]
+let authInit user =
+    let (home,homeCmd) = Home.State.init()
+    Auth {CurrentPage=Home;UserInfo = user;Home = home},homeCmd
+
+let toAuthRedirect user = 
+    let (model,cmd) = authInit user;
+    (model,Cmd.batch 
+                [
+                        (Navigation.modifyUrl "#home" ) ;
+                         cmd
+                ])
+
+let toUnAuthRedirect =
+    let (model,cmd) = unAuthInit()
+    (model,Cmd.batch[
+                    Navigation.modifyUrl "#signin";
+                     cmd 
+                    ])
+
+let init result =
+    let (model,cmd) = unAuthInit()
+    let (newModel,newcmd) = urlUpdate result model
+    newModel,cmd@newcmd
+
 
 let update msg (model:Model) =
     match model with
 
     | UnAuth unAuth ->
         match msg with
+       
         | SignupMsg msg ->
-                    let (signup, signupCmd) = Signup.State.update msg unAuth.Signup
+            match msg with 
+          
+            | Signup.Types.Msg.ToAuth user ->  toAuthRedirect user
+
+            | _ ->  let (signup, signupCmd) = Signup.State.update msg unAuth.Signup
                     UnAuth{ unAuth with Signup = signup }, Cmd.map SignupMsg signupCmd
+        
         | SigninMsg msg -> 
              match msg with 
-                | Signin.Types.Msg.ToAuth user ->
-                    let (home,_) = Home.State.init()
-                    Auth {CurrentPage=Home;UserInfo = user;Home = home}, Navigation.modifyUrl "#home"
+            
+                | Signin.Types.Msg.ToAuth user ->  toAuthRedirect user
+              
                 | _ ->   
                     let (signinModel,signinCmd) = Signin.State.update unAuth.Signin msg
                     UnAuth {unAuth with Signin = signinModel}, Cmd.map SigninMsg signinCmd
     
     |Auth auth -> 
         match msg with
+        |NavbarMsg msg ->
+            match msg with 
+
+            |Logout -> toUnAuthRedirect
+            
         |HomeMsg msg ->
             let (home, homeCmd) = Home.State.update msg auth.Home
             Auth { auth with Home = home }, Cmd.map HomeMsg homeCmd

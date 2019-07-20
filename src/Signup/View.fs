@@ -38,7 +38,7 @@ let root (model: Model) dispatch =
                     [ Message.body []
                         [ str "Hello, signup please" ] ]
                   viewFormEditing formState dispatch ]
-        |Validating(errors,formState) ->
+        | Validating(errors,formState) ->
             div []
                 [ Message.message [ Message.Color IsInfo ]
                     [ Message.body []
@@ -49,13 +49,7 @@ let root (model: Model) dispatch =
                       [ Message.body []
                          (errors |> List.map str) ]
                 ]
-        | Completed x ->
-            Message.message [ Message.Color IsInfo ]
-                [ Message.header []
-                    [  sprintf "%s You have successfully registered" x.Username |> str]
-                  Message.body []
-                    [ str "Redirect to homepage ..." ] ]
-
+            
     div [ Style [ MaxWidth "500px"
                   MinHeight "530px"
                   PaddingTop "10px" ] ]

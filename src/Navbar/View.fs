@@ -1,7 +1,7 @@
 module Navbar.View
-
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
+open Fulma
 
 let navButton classy href faClass txt =
     p
@@ -18,16 +18,25 @@ let navButton classy href faClass txt =
                 [ ]
                 [ str txt ] ] ]
 
-let navButtons =
+let navButtons dispatch =
     span
         [ ClassName "navbar-item" ]
         [ div
             [ ClassName "field is-grouped" ]
             [ navButton "twitter" "https://twitter.com/FableCompiler" "fa-twitter" "Twitter"
               navButton "github" "https://github.com/elmish/elmish" "fa-github" "Fork me"
-              navButton "github" "https://gitter.im/fable-compiler/Fable" "fa-gitter" "Gitter" ] ]
+              navButton "github" "https://gitter.im/fable-compiler/Fable" "fa-gitter" "Gitter" 
+              Button.button 
+                [
+                  Button.Color IsLink
+                  Button.OnClick (fun e -> Types.Logout |> dispatch)
+                ]  
+                  [str "Logout"]
+            ]
+        ]
+        
 
-let root =
+let root dispatch =
     nav
         [ ClassName "navbar is-dark" ]
         [ div
@@ -39,4 +48,4 @@ let root =
                     [ str "Elmish" ] ]
               div
                 [ ClassName "navbar-end" ]
-                [ navButtons ] ] ]
+                [ navButtons dispatch] ] ]

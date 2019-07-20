@@ -7,6 +7,7 @@ type Msg =
     | SignupMsg of Signup.Types.Msg
     | SigninMsg of Signin.Types.Msg
     | HomeMsg of Home.Types.Msg
+    | NavbarMsg of Navbar.Types.Msg
 
 type AuthModel = {
   CurrentPage: Page

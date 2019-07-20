@@ -7,11 +7,8 @@ open Types
 open Fable.PowerPack
 open Thoth.Json
 open Fable.Import
-open Fable.Core
-open Fable.Import.React
 open UserInfo
 open Fable.PowerPack.Fetch.Fetch_types
-open Http
 
 let createProfileFromServer (body: string) =
     promise {
@@ -157,10 +154,7 @@ let (formState, formConfig) =
                     .WithDefaultView())
             .Build()
 
-let applyIfEditing model f =
-    match model with
-    | Editing m -> f m
-    | Completed x-> Completed x, []
+
 
 
 let init _ =
@@ -169,46 +163,37 @@ let init _ =
 
 
 
-let update msg formState: Model * Cmd<Signup.Types.Msg> =
-    match msg with
-    | SuccessResponse response ->
-        applyIfEditing formState
-            (fun formState ->
-                match response with
-                | Ok signup->
-                    let _ = formState |> Form.setLoading false
-                    printf "%A" signup
-                    Completed signup, []
-                | Errors errors ->
-                    let newFormState =
-                                formState
-                                |> Form.setLoading false
-                    Validating (errors |> List.map(fun x -> x.Text),newFormState), Cmd.none
-            )
+let update msg model: Model * Cmd<Signup.Types.Msg> =
+    match model with
+    |Editing formState ->    
+        match msg with
+        | SuccessResponse response ->
+            match response with
+            | Ok userInfo->
+                let _ = formState |> Form.setLoading false
+                printf "%A" userInfo
+                Editing formState, ToAuth userInfo |> Cmd.ofMsg
+            | Errors errors ->
+                let newFormState =
+                            formState
+                            |> Form.setLoading false
+                Validating (errors |> List.map(fun x -> x.Text),newFormState), Cmd.none
 
-    | FailResponse exn ->
-        applyIfEditing formState
-            (fun formState ->
-                let state = formState |> Form.setLoading false
+        | FailResponse exn ->
+            let state = formState |> Form.setLoading false
+            Editing formState, []
+
+        | Submit ->
+            let (newFormState, isValid) = Form.validate formConfig formState
+            if isValid then
+                let body = Form.toJson formConfig newFormState
+                let newModel = formState |> Form.setLoading true
+                Editing formState,
+                 Cmd.ofPromise createProfile body SuccessResponse FailResponse
+            else
                 Editing formState, []
-            )
 
-    | Submit ->
-        applyIfEditing formState
-            (fun formState ->
-                let (newFormState, isValid) = Form.validate formConfig formState
-                if isValid then
-                    let body = Form.toJson formConfig newFormState
-                    let newModel = formState |> Form.setLoading true
-                    Editing formState,
-                     Cmd.ofPromise createProfile body SuccessResponse FailResponse
-                else
-                    Editing formState, []
-             )
-
-    | OnFormMsg msg ->
-        applyIfEditing formState
-            (fun formState ->
-                let (formState, formCmd) = Form.update formConfig msg formState
-                Editing formState, Cmd.map OnFormMsg formCmd
-            )
+        | OnFormMsg msg ->
+            let (formState, formCmd) = Form.update formConfig msg formState
+            Editing formState, Cmd.map OnFormMsg formCmd
+    |Validating (_,formState) -> Editing formState,Cmd.none 

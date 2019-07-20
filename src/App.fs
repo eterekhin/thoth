@@ -17,8 +17,6 @@ open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.Import.React
 
-[<Emit("null")>]
-let emptyElement : ReactElement= jsNative
 
 //#region Menus
 let menuItem label page currentPage =
@@ -48,7 +46,6 @@ let root model dispatch =
             | Page.About -> Info.View.root
             | Signup -> Signup.View.root unAuthModel.Signup (SignupMsg >> dispatch)
             | Signin -> Signin.View.root unAuthModel.Signin (SigninMsg >> dispatch)
-            | _ -> div[][]
     
     | Auth authModel ->
       match page with
@@ -61,7 +58,7 @@ let root model dispatch =
   let view menuItems currentPage = 
     div
       []
-      [ Navbar.View.root
+      [ Navbar.View.root (NavbarMsg >> dispatch)
         div
           [ ClassName "section" ]
           [ div
