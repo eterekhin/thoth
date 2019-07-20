@@ -30,10 +30,8 @@ let createProfileFromServer (body: string) =
 
 
 let createProfile (body: string): JS.Promise<CreationResponse> =
-    printf "createProfile"
     promise {
          let! data = createProfileFromServer body
-         printf "createResponse data:%A" data
          let decoder =
             Decode.field "code" Decode.string
             |> Decode.andThen (
@@ -103,8 +101,7 @@ let getDataFromServer =
                         ]
         }
 
-[<Emit("null")>]
-let emptyElement : ReactElement= jsNative
+
 
 let getLanguages =
     promise {
@@ -168,51 +165,50 @@ let applyIfEditing model f =
 
 let init _ =
     let (formState, formCmds) = Form.init formConfig formState
-    Editing { FormState = formState; StringValue = "" }, Cmd.map OnFormMsg formCmds
+    Editing formState, Cmd.map OnFormMsg formCmds
 
 
 
-let update msg model: Model * Cmd<Signup.Types.Msg> =
+let update msg formState: Model * Cmd<Signup.Types.Msg> =
     match msg with
     | SuccessResponse response ->
-        applyIfEditing model
-            (fun x ->
+        applyIfEditing formState
+            (fun formState ->
                 match response with
                 | Ok signup->
-                    let _ = x.FormState |> Form.setLoading false
+                    let _ = formState |> Form.setLoading false
                     printf "%A" signup
                     Completed signup, []
                 | Errors errors ->
                     let newFormState =
-                                x.FormState
+                                formState
                                 |> Form.setLoading false
-                                |> Form.setErrors formConfig errors
-                    Editing { x with FormState = newFormState }, Cmd.none
-             )
+                    Validating (errors |> List.map(fun x -> x.Text),newFormState), Cmd.none
+            )
 
     | FailResponse exn ->
-        applyIfEditing model
-            (fun model ->
-                let state = model.FormState |> Form.setLoading false
-                Editing { model with FormState = state }, []
+        applyIfEditing formState
+            (fun formState ->
+                let state = formState |> Form.setLoading false
+                Editing formState, []
             )
 
     | Submit ->
-        applyIfEditing model
-            (fun model ->
-                let (newFormState, isValid) = Form.validate formConfig model.FormState
+        applyIfEditing formState
+            (fun formState ->
+                let (newFormState, isValid) = Form.validate formConfig formState
                 if isValid then
                     let body = Form.toJson formConfig newFormState
-                    let newModel = model.FormState |> Form.setLoading true
-                    Editing { model with FormState = newModel },
+                    let newModel = formState |> Form.setLoading true
+                    Editing formState,
                      Cmd.ofPromise createProfile body SuccessResponse FailResponse
                 else
-                    Editing model, []
+                    Editing formState, []
              )
 
     | OnFormMsg msg ->
-        applyIfEditing model
-            (fun model ->
-                let (formState, formCmd) = Form.update formConfig msg model.FormState
-                Editing { model with FormState = formState }, Cmd.map OnFormMsg formCmd
+        applyIfEditing formState
+            (fun formState ->
+                let (formState, formCmd) = Form.update formConfig msg formState
+                Editing formState, Cmd.map OnFormMsg formCmd
             )

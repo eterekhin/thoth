@@ -15,6 +15,10 @@ importAll "../sass/main.sass"
 
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
+open Fable.Import.React
+
+[<Emit("null")>]
+let emptyElement : ReactElement= jsNative
 
 //#region Menus
 let menuItem label page currentPage =
@@ -25,56 +29,55 @@ let menuItem label page currentPage =
             Href (toHash page) ]
           [ str label ] ]
 
-let unAuthMenu currentPage= 
-  aside
+let menuBuilder items currentPage = 
+ aside
       [ ClassName "menu" ]
       [ p
           [ ClassName "menu-label" ]
           [ str "General" ]
         ul
           [ ClassName "menu-list" ]
-          [ menuItem "Signup" Signup currentPage
-            menuItem "Signin" Signin currentPage
-       ] ]
+           (items |> List.map(fun f -> f currentPage))
+        ]
 
-let authMenu currentPage =
-  aside
-    [ ClassName "menu" ]
-    [ p
-        [ ClassName "menu-label" ]
-        [ str "General" ]
-      ul
-        [ ClassName "menu-list" ]
-        [ menuItem "Counter sample" Counter currentPage
-          menuItem "About" Page.About currentPage ] ]
-//#endregion
-
-let root model dispatch =
+let root model dispatch = 
   let pageHtml page =
-    match page with
-    | Page.About -> Info.View.root
-    | Counter -> Counter.View.root model.Counter (CounterMsg >> dispatch)
-    | Signup -> Signup.View.root model.Signup (SignupMsg >> dispatch)
-    | Signin -> Signin.View.root model.Signin (SigninMsg >> dispatch)
+    match model with 
+    | UnAuth unAuthModel ->
+            match page with
+            | Page.About -> Info.View.root
+            | Signup -> Signup.View.root unAuthModel.Signup (SignupMsg >> dispatch)
+            | Signin -> Signin.View.root unAuthModel.Signin (SigninMsg >> dispatch)
+            | _ -> div[][]
+    
+    | Auth authModel ->
+      match page with
+      | Home -> Home.View.root authModel.Home (HomeMsg >> dispatch)
 
-  div
-    []
-    [ Navbar.View.root
-      div
-        [ ClassName "section" ]
-        [ div
-            [ ClassName "container" ]
-            [ div
-                [ ClassName "columns" ]
-                [ 
-                  (match model.Signup with 
-                    |Signup.Types.Model.Completed s -> authMenu model.CurrentPage
-                    |_ -> unAuthMenu  model.CurrentPage)
-                  div
-                    [ ClassName "column" ]
-                    [ pageHtml model.CurrentPage ] 
-                    
-                 ] ]] ]
+  let unAuthItems = [menuItem "Signup" Signup 
+                     menuItem "Signin" Signin]
+
+  let authItems = [menuItem "Home" Home];
+  let view menuItems currentPage = 
+    div
+      []
+      [ Navbar.View.root
+        div
+          [ ClassName "section" ]
+          [ div
+              [ ClassName "container" ]
+              [ div
+                  [ ClassName "columns" ]
+                  [ 
+                    menuBuilder menuItems currentPage
+                    div
+                      [ ClassName "column" ]
+                      [ pageHtml currentPage ] 
+                      
+                   ] ]] ]
+  match model with 
+  | Auth authModel -> view authItems authModel.CurrentPage
+  | UnAuth unAuthModel -> view unAuthItems unAuthModel.CurrentPage
 
 open Elmish.React
 open Elmish.Debug

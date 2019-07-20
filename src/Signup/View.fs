@@ -23,9 +23,9 @@ let private formActions (formState: FormBuilder.Types.State) dispatch =
 let viewFormEditing model dispatch =
     Form.render
         { Config = formConfig
-          State = model.FormState
+          State = model
           Dispatch = dispatch
-          ActionsArea = (formActions model.FormState dispatch)
+          ActionsArea = (formActions model dispatch)
           Loader = Form.DefaultLoader }
 
 
@@ -38,6 +38,17 @@ let root (model: Model) dispatch =
                     [ Message.body []
                         [ str "Hello, signup please" ] ]
                   viewFormEditing formState dispatch ]
+        |Validating(errors,formState) ->
+            div []
+                [ Message.message [ Message.Color IsInfo ]
+                    [ Message.body []
+                        [ str "Hello, signup please" ] ]
+                  viewFormEditing formState dispatch 
+                  div[Style[MarginTop "20px"]][]
+                  Message.message [ Message.Color IsDanger ]
+                      [ Message.body []
+                         (errors |> List.map str) ]
+                ]
         | Completed x ->
             Message.message [ Message.Color IsInfo ]
                 [ Message.header []

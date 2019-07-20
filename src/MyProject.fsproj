@@ -21,6 +21,10 @@
     <Compile Include="Signup/Types.fs" />
     <Compile Include="Signup/State.fs" />
     <Compile Include="Signup/View.fs" />
+    <!-- Home -->
+    <Compile Include="Home/Types.fs"/>
+    <Compile Include="Home/State.fs"/>
+    <Compile Include="Home/View.fs"/>
     <!-- Navbar -->
     <Compile Include="Navbar/View.fs" />
     <!-- App -->

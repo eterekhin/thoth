@@ -4,18 +4,8 @@ open Thoth.Elmish.FormBuilder
 open Thoth.Elmish.FormBuilder.BasicFields
 open Elmish
 open Types
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
-open Fable.PowerPack
-open Thoth.Json
-open Fable.Import
-open Fable.Core
-open Fable.Import.React
 open UserInfo
-open Fable.PowerPack.Fetch.Fetch_types
-open Signin.Types
 open Http
-
 let (formState, formConfig) =
        FormBuilder.Form<Types.Msg>
             .Create(OnFormMsg)
@@ -39,9 +29,7 @@ let (formState, formConfig) =
                         then Invalid "Password must be longer than 5 characters"
                         else Types.Valid)
                     .WithDefaultView())
-
             .Build()
-
 
 
 let init _ =
@@ -51,26 +39,49 @@ let init _ =
 
 let update (model:Model) msg =
     match msg with 
+
     |OnFormMsg msg -> 
         match model with 
-        |EditingForm f -> 
+        |EditingForm f | Validating(_,f) -> 
+            printf "OnFormMsg"
             let (formState, formCmd) = Form.update formConfig msg f
-            EditingForm formState, formCmd
+            EditingForm formState,  Cmd.map OnFormMsg formCmd
+
     |Submit ->
+        printf "Submit"
         match model with 
         |EditingForm x ->
             let (newFormState,isValid) = Form.validate formConfig x
-            let body = Form.toJson formConfig newFormState
-            let newModel = x |> Form.setLoading true
-            EditingForm newModel,
-                Cmd.ofPromise (post "http://localhost:5000/signin" AuthUser.Decoder) body Response FailSignin
+            match isValid with 
+            |true ->
+                let body = Form.toJson formConfig newFormState
+                let newModel = x |> Form.setLoading true
+                EditingForm newModel,
+                    (Cmd.ofPromise (post "http://localhost:8080/signin" AuthUser.Decoder failDecoder)
+                        body 
+                        (function 
+                         | Correct s-> SuccessResponse s 
+                         | Failed f -> ErrorResponse f
+                        )
+                        FailSignin)
+            |false -> model,[]
     
-    |Response auth ->
+    |SuccessResponse auth ->
+        printf "successResponse %A" auth
         match model with 
         | EditingForm form -> 
             let newModel = form |> Form.setLoading false
-            let status = Encode
+            EditingForm newModel, ToAuth auth |> Cmd.ofMsg 
+
+    | ErrorResponse errorMsg -> 
+        printf "ErrorResponse"
+        match model with 
+        | EditingForm form ->
+            let (_,errorText) = errorMsg
+            let newModel = form  |> Form.setLoading false
+            Validating (errorText,newModel),[]
             
-    |FailSignin e -> model,[]
+    |FailSignin _ -> 
+        printf "failed"
+        model,[]
     
-    |_ -> model,[]

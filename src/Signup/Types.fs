@@ -13,14 +13,10 @@ type CreationResponse =
     |Ok of UserInfo.AuthUser
     |Errors of Types.ErrorDef list
 
-type EditingModel =
-    {
-        FormState: FormBuilder.Types.State
-        StringValue: string
-    }
 
 type Model =
-    | Editing of EditingModel
+    | Validating of (string list)*FormBuilder.Types.State
+    | Editing of FormBuilder.Types.State
     | Completed of UserInfo.AuthUser
 
 type Msg =

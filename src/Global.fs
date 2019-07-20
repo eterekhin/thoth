@@ -5,10 +5,11 @@ type Page =
     | Signin
     | Counter
     | About
+    | Home 
 
 let toHash page =
     match page with
     | Signup -> "#signup"
     | Signin -> "#signin"
-    | About -> "#about"
+    | Home -> "#home"
     | Counter -> "#counter"
