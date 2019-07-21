@@ -14,7 +14,6 @@ importAll "../sass/main.sass"
 
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
-open Fulma.Extensions.Wikiki
 //#region Menus
 let menuItem label page currentPage =
     li
@@ -42,10 +41,10 @@ let root model dispatch =
             match page with
             | Signup -> Signup.View.root unAuthModel.Signup (SignupMsg >> dispatch)
             | Signin -> Signin.View.root unAuthModel.Signin (SigninMsg >> dispatch)
-            | Loading -> PageLoader.pageLoader [ PageLoader.Color IsBlack;PageLoader.IsActive true ][ ]
+            | Loading -> div [] []
     | Auth authModel ->
-      match page with
-      | Home -> Home.View.root authModel.Home (HomeMsg >> dispatch)
+        match page with
+        | Home -> Home.View.root authModel.Home (HomeMsg >> dispatch)
       
 
   let unAuthItems = [menuItem "Signup" Signup 
