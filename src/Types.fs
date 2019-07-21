@@ -1,13 +1,14 @@
 module App.Types
-
+open Http
 open Global
 
 type Msg =
-    | CounterMsg of Counter.Types.Msg
     | SignupMsg of Signup.Types.Msg
     | SigninMsg of Signin.Types.Msg
     | HomeMsg of Home.Types.Msg
     | NavbarMsg of Navbar.Types.Msg
+    | OnSuccessUserInfoLoaded of HttpResult<UserInfo.AuthUser>
+    | OnFailedUserInfoLoaded of exn
 
 type AuthModel = {
   CurrentPage: Page

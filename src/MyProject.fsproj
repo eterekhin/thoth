@@ -39,6 +39,7 @@
     <PackageReference Include="Thoth.Elmish" Version="0.1.1" />
     <PackageReference Include="Thoth.Elmish.FormBuilder" Version="0.2.0" />
     <PackageReference Include="Thoth.Elmish.FormBuilder.BasicFields" Version="0.1.2" />
+    <PackageReference Include="Fulma.Extensions.Wikiki.PageLoader" Version="2.0.1" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

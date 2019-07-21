@@ -3,7 +3,7 @@ open Thoth.Elmish
 
 type Msg = 
     | SuccessResponse of UserInfo.AuthUser
-    | ErrorResponse of (string*(string list))
+    | ErrorResponse of string*(string list)
     | FailSignin of exn
     | Submit
     | OnFormMsg of FormBuilder.Types.Msg

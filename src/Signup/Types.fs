@@ -15,7 +15,6 @@ type Model =
     | Editing of FormBuilder.Types.State
 
 type Msg =
-    | ChangeStr of string
     | OnFormMsg of FormBuilder.Types.Msg
     | SuccessResponse of CreationResponse
     | FailResponse of Exception

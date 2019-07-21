@@ -1,23 +1,20 @@
 module App.View
-
+open Fulma
 open Elmish
 open Elmish.Browser.Navigation
 open Elmish.Browser.UrlParser
 open Fable.Core
 open Fable.Core.JsInterop
-open Fable.Import
-open Fable.Import.Browser
 open Types
 open App.State
 open Global
 open Signin
+
 importAll "../sass/main.sass"
 
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
-open Fable.Import.React
-
-
+open Fulma.Extensions.Wikiki
 //#region Menus
 let menuItem label page currentPage =
     li
@@ -43,13 +40,13 @@ let root model dispatch =
     match model with 
     | UnAuth unAuthModel ->
             match page with
-            | Page.About -> Info.View.root
             | Signup -> Signup.View.root unAuthModel.Signup (SignupMsg >> dispatch)
             | Signin -> Signin.View.root unAuthModel.Signin (SigninMsg >> dispatch)
-    
+            | Loading -> PageLoader.pageLoader [ PageLoader.Color IsBlack;PageLoader.IsActive true ][ ]
     | Auth authModel ->
       match page with
       | Home -> Home.View.root authModel.Home (HomeMsg >> dispatch)
+      
 
   let unAuthItems = [menuItem "Signup" Signup 
                      menuItem "Signin" Signin]

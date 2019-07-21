@@ -10,35 +10,57 @@ type Response<'T>=
                 data:'T       
         }
 
-let failDecoder<'t> = 
+let failDecoder = 
         let decodeTuple = Decode.tuple2 Decode.string (Decode.list Decode.string)
         decodeTuple
 
-type PostResult<'S,'F> =
+type HttpResult<'S> =
                 | Correct of 'S
-                | Failed of 'F 
+                | Failed of string*(string list)
 
-let post<'a,'b>  url (successDecoder:Decode.Decoder<'a>) (failDecoder:Decode.Decoder<'b>) body= 
+
+let private decode (successDecoder:Decode.Decoder<'a>) (failDecoder:Decode.Decoder<string*(string list)>) text = 
+        let decoder = Decode.field "code" Decode.string 
+                        |> Decode.andThen(
+                                       function
+                                        |"ok" -> Decode.map Correct (Decode.field "data" successDecoder)
+                                        |"error" -> Decode.map Failed (Decode.field "data" failDecoder)
+                                        | _ -> failwith "NotImplemented"
+                        )
+
+        match Decode.fromString decoder text with 
+                        |Result.Ok ok -> ok
+                        |Error r ->failwithf "decoder error %s" r
+
+
+let post<'a>  url (successDecoder:Decode.Decoder<'a>) body= 
     
     promise {
         let defaultProps =
               [
-                RequestProperties.Method HttpMethod.POST;
+                Method HttpMethod.POST;
                 Fetch.requestHeaders [ ContentType "application/json" ]
-                RequestProperties.Body(body |> unbox) ]
+                Body(body |> unbox) ]
 
-        let! response = Fetch.postRecord url body defaultProps
+        let! response = Fetch.postRecord (sprintf "http://localhost:8080/%s"url) body defaultProps
         let! text = response.text();
         
-        let decoder = Decode.field "code" Decode.string 
-                        |> Decode.andThen(
-                                function
-                                        |"ok" -> Decode.map Correct (Decode.field "data" successDecoder)
-                                        |"error" -> Decode.map Failed (Decode.field "data" failDecoder)
-                        )
+        return decode successDecoder failDecoder text
+
+    }
+
+let getWithAuthorize<'a>  url (successDecoder:Decode.Decoder<'a>)  jwt = 
+    
+    promise {
+        let defaultProps =
+              [
+                Method HttpMethod.GET;
+                Fetch.requestHeaders [ ContentType "application/json"; Authorization jwt ]
+              ]
+
+        let! response = Fetch.fetch (sprintf "http://localhost:8080/%s"url) defaultProps
+        let! text = response.text();
         
-        return (match Decode.fromString decoder text with 
-                        |Result.Ok ok -> ok
-                        |Error r ->failwithf "decoder error %s" r)
+        return decode successDecoder failDecoder text
 
     }

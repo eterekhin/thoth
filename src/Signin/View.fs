@@ -26,26 +26,26 @@ let viewFormEditing (formState:Types.State) dispatch =
 
 let root model dispatch = 
     let content =match model with 
-                |EditingForm formState -> 
-                                div []
-                                    [ Message.message [ Message.Color IsInfo ]
-                                        [ Message.body []
-                                            [ str "Hello, signin please" ] ]
-                                      viewFormEditing formState dispatch
-                                    ]
-                |Validating (errors,formState) ->
+                  |EditingForm formState -> 
                                   div []
-                                    [ Message.message [ Message.Color IsInfo ]
-                                        [ Message.body []
-                                            [ str "Hello, signin please" ] ]
-                                      viewFormEditing formState dispatch
-                                      div
-                                       [Style[MarginTop "20px"]]
-                                       [Message.message [ Message.Color IsDanger ]
-                                         [ Message.body []
-                                        (errors |> List.map(str))]]]
+                                      [ Message.message [ Message.Color IsInfo ]
+                                          [ Message.body []
+                                              [ str "Hello, signin please" ] ]
+                                        viewFormEditing formState dispatch
+                                      ]
+                  |Validating (errors,formState) ->
+                                    div []
+                                      [ Message.message [ Message.Color IsInfo ]
+                                          [ Message.body []
+                                              [ str "Hello, signin please" ] ]
+                                        viewFormEditing formState dispatch
+                                        div
+                                         [Style[MarginTop "20px"]]
+                                         [Message.message [ Message.Color IsDanger ]
+                                           [ Message.body []
+                                          (errors |> List.map(str))]]]
 
-                |_ -> div [] []
+                  |_ -> div [] []
 
     div [ Style [ MaxWidth "500px"
                   MinHeight "530px"

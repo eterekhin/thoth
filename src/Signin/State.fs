@@ -46,6 +46,7 @@ let update (model:Model) msg =
             printf "OnFormMsg"
             let (formState, formCmd) = Form.update formConfig msg f
             EditingForm formState,  Cmd.map OnFormMsg formCmd
+        | Completed(_) -> failwith "Not Implemented"
 
     |Submit ->
         printf "Submit"
@@ -57,29 +58,31 @@ let update (model:Model) msg =
                 let body = Form.toJson formConfig newFormState
                 let newModel = x |> Form.setLoading true
                 EditingForm newModel,
-                    (Cmd.ofPromise (post "http://localhost:8080/signin" AuthUser.Decoder failDecoder)
+                    (Cmd.ofPromise (post "signin" AuthUser.Decoder)
                         body 
-                        (function 
-                         | Correct s-> SuccessResponse s 
-                         | Failed f -> ErrorResponse f
-                        )
+                        (fun f -> match f with | Correct s -> SuccessResponse s | Failed (errorKey,errorText)-> ErrorResponse (errorKey,errorText))
                         FailSignin)
             |false -> model,[]
+        | Validating(_, _) -> failwith "Not Implemented"
+        | Completed(_) -> failwith "Not Implemented"
     
     |SuccessResponse auth ->
         printf "successResponse %A" auth
         match model with 
         | EditingForm form -> 
             let newModel = form |> Form.setLoading false
-            EditingForm newModel, ToAuth auth |> Cmd.ofMsg 
+            EditingForm newModel, ToAuth auth |> Cmd.ofMsg
+        | Validating(_, _) -> failwith "Not Implemented"
+        | Completed(_) -> failwith "Not Implemented" 
 
-    | ErrorResponse errorMsg -> 
+    | ErrorResponse (_,errorText) -> 
         printf "ErrorResponse"
         match model with 
         | EditingForm form ->
-            let (_,errorText) = errorMsg
             let newModel = form  |> Form.setLoading false
             Validating (errorText,newModel),[]
+        | Validating(_, _) -> failwith "Not Implemented"
+        | Completed(_) -> failwith "Not Implemented"
             
     |FailSignin _ -> 
         printf "failed"

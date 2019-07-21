@@ -196,4 +196,5 @@ let update msg model: Model * Cmd<Signup.Types.Msg> =
         | OnFormMsg msg ->
             let (formState, formCmd) = Form.update formConfig msg formState
             Editing formState, Cmd.map OnFormMsg formCmd
+        | ToAuth(_) -> failwith "Not Implemented"
     |Validating (_,formState) -> Editing formState,Cmd.none 
