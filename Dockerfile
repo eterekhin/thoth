@@ -1,4 +1,4 @@
-FROM node:carbon
+FROM nojaf/fable
 WORKDIR /app
 
 COPY package*.json ./
