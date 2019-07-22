@@ -1,11 +1,17 @@
 FROM node:carbon
-
 WORKDIR /app
 
 COPY package*.json ./
 
 RUN npm install
 
-COPY src /app
+COPY src ./src
 
-CMD ["npx","webpack-dev-server"]
+COPY server.js .
+COPY webpack.config.js .
+
+RUN npm run-script build
+
+EXPOSE 3000
+
+CMD ["npm", "run-script", "start"]
