@@ -14,6 +14,7 @@ importAll "../sass/main.sass"
 
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
+open Fable.Import
 //#region Menus
 let menuItem label page currentPage =
     li
@@ -34,7 +35,7 @@ let menuBuilder items currentPage =
            (items |> List.map(fun f -> f currentPage))
         ]
 
-let root model dispatch = 
+let root model dispatch =
   let pageHtml page =
     match model with 
     | UnAuth unAuthModel ->

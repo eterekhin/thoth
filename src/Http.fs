@@ -3,7 +3,7 @@ open Fable.PowerPack.Fetch.Fetch_types
 open Thoth.Json
 open Fable.PowerPack.PromiseImpl
 open Fable.PowerPack
-
+open Global
 type Response<'T>= 
         {
                 status:string
@@ -18,7 +18,7 @@ type HttpResult<'S> =
                 | Correct of 'S
                 | Failed of string*(string list)
 
-
+let ``host:port`` = host + (string port)
 let private decode (successDecoder:Decode.Decoder<'a>) (failDecoder:Decode.Decoder<string*(string list)>) text = 
         let decoder = Decode.field "code" Decode.string 
                         |> Decode.andThen(
@@ -42,7 +42,7 @@ let post<'a>  url (successDecoder:Decode.Decoder<'a>) body=
                 Fetch.requestHeaders [ ContentType "application/json" ]
                 Body(body |> unbox) ]
 
-        let! response = Fetch.postRecord (sprintf "http://localhost:8080/%s"url) body defaultProps
+        let! response = Fetch.postRecord (sprintf "%s/%s"``host:port``url) body defaultProps
         let! text = response.text();
         
         return decode successDecoder failDecoder text
@@ -58,7 +58,7 @@ let getWithAuthorize<'a>  url (successDecoder:Decode.Decoder<'a>)  jwt =
                 Fetch.requestHeaders [ ContentType "application/json"; Authorization jwt ]
               ]
 
-        let! response = Fetch.fetch (sprintf "http://localhost:8080/%s"url) defaultProps
+        let! response = Fetch.fetch (sprintf "%s/%s"``host:port`` url) defaultProps
         let! text = response.text();
         
         return decode successDecoder failDecoder text

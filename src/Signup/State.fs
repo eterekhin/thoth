@@ -9,26 +9,11 @@ open Thoth.Json
 open Fable.Import
 open UserInfo
 open Fable.PowerPack.Fetch.Fetch_types
-
-let createProfileFromServer (body: string) =
-    promise {
-
-        let defaultProps =
-              [
-                RequestProperties.Method HttpMethod.POST;
-                Fetch.requestHeaders [ ContentType "application/json" ]
-                RequestProperties.Body(body |> unbox) ]
-
-        let! response = Fetch.postRecord "http://localhost:8080/signup" body defaultProps
-
-        let text = response.text();
-        return! text;
-    }
-
+open Http
 
 let createProfile (body: string): JS.Promise<CreationResponse> =
     promise {
-         let! data = createProfileFromServer body
+         
          let decoder =
             Decode.field "code" Decode.string
             |> Decode.andThen (
@@ -48,14 +33,10 @@ let createProfile (body: string): JS.Promise<CreationResponse> =
                     sprintf "`%s` is an unkown code" unkown
                     |> Decode.fail
             )
-
-         let result =
-            match Decode.fromString decoder data with
-            | Result.Ok result ->
-                result
-            | Error msg ->
-                failwith msg
-         return result
+         let! result = post "signup" decoder  body
+         return match result with
+                     | Correct r -> r
+                     | Failed (key,text) ->  Errors (text |> List.map(fun t -> {Key=key;Text=t}))
     }
 
 

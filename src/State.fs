@@ -9,7 +9,6 @@ open Types
 open UserInfo
 open Http
 open Fable.Import
-open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Import.Browser
 open Fable.Core.Exceptions
@@ -21,8 +20,7 @@ let pageParser: Parser<Page->Page,Page> =
         map Home (s "home")
     ]
 
-[<Emit("undefined")>]
-let undefined : obj = jsNative
+
 
 let urlUpdate (result : Page option) model =
     match model with 

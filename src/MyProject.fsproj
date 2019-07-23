@@ -4,8 +4,8 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Global to the app -->
-    <Compile Include="Http.fs"/>
     <Compile Include="Global.fs" />
+    <Compile Include="Http.fs"/>
     <Compile Include="UserInfo.fs" />
     <!-- Info -->
     <Compile Include="Info/View.fs" />
