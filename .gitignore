@@ -200,4 +200,4 @@ obj
 bin
 out
 .fable
-    
+    .ionide/symbolCache.db

@@ -1,7 +1,5 @@
 module Global
 open Fable.Core
-open Fable.Core.Exceptions
-open Fable.Import
 
 [<Emit("undefined")>]
 let undefined : obj = jsNative
