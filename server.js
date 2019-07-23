@@ -2,7 +2,8 @@ var path = require("path");
 var express = require("express");
 
 var DIST_DIR = path.join(__dirname, "deploy");
-var PORT = 3000 || process.env.PORT;
+
+var PORT = process.env.PORT || PORT;
 var app = express();
 
 console.log(`express run on ${PORT}`)
