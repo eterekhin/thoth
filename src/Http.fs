@@ -18,7 +18,7 @@ type HttpResult<'S> =
                 | Correct of 'S
                 | Failed of string*(string list)
 
-let ``host:port`` = host + (string port)
+let ``host:port`` = host
 let private decode (successDecoder:Decode.Decoder<'a>) (failDecoder:Decode.Decoder<string*(string list)>) text = 
         let decoder = Decode.field "code" Decode.string 
                         |> Decode.andThen(

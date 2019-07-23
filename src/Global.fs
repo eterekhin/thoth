@@ -3,21 +3,15 @@ open Fable.Core
 open Fable.Core.Exceptions
 open Fable.Import
 
-open Fable.Core.JsInterop
 [<Emit("undefined")>]
 let undefined : obj = jsNative
 
-[<Emit("process.env")>]
-let env :obj = jsNative
+[<Emit("production")>]
+let production:bool= jsNative
 let host = 
-     if env?PORT = undefined 
-     then @"http://localhost/"
-     else @"https://note-subscribe-api/"
-
-let port = 
-    if env?PORT = undefined 
-    then 4200 
-    else int env?PORT
+     if not production 
+     then @"http://localhost:8080"
+     else @"https://note-subscribe-api.herokuapp.com/"
 
 type Page =
     | Signup

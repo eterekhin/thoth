@@ -14,7 +14,6 @@ var MiniCssExtractPlugin = require("mini-css-extract-plugin");
 var port = process.env.PORT || 4200
 console.log('port',port);
 
-
 var CONFIG = {
     // The tags to include the generated JS and CSS will be automatically injected in the HTML template
     // See https://github.com/jantimon/html-webpack-plugin
@@ -46,6 +45,7 @@ var CONFIG = {
 // If we're running the webpack-dev-server, assume we're in development mode
 var isProduction = !process.argv.find(v => v.indexOf('webpack-dev-server') !== -1);
 console.log("Bundling for " + (isProduction ? "production" : "development") + "...");
+
 
 // The HtmlWebpackPlugin allows us to use a template for the index.html page
 // and automatically injects <script> or <link> tags for generated bundles.
@@ -95,11 +95,13 @@ module.exports = {
     //      - HotModuleReplacementPlugin: Enables hot reloading when code changes without refreshing
     plugins: isProduction ?
         commonPlugins.concat([
+			new webpack.DefinePlugin({production:true}),
             new MiniCssExtractPlugin({ filename: 'style.css' }),
             new CopyWebpackPlugin([{ from: resolve(CONFIG.assetsDir) }]),
         ])
         : commonPlugins.concat([
             new webpack.HotModuleReplacementPlugin(),
+			new webpack.DefinePlugin({production:false}),
         ]),
     resolve: {
         // See https://github.com/fable-compiler/Fable/issues/1490
